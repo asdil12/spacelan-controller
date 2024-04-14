@@ -9,37 +9,95 @@
 
 int poti = 0;
 int poti1 = 0;
-
 float btn1 = 0;
+
+int potis[50] = {0};
+int potis_max[50];
+int potis_min[50];
+float buttons[50] = {0};
+
+int get_poti(int gpio_pin) {
+  int newpoti = analogRead(gpio_pin);
+  // debounce
+  potis[gpio_pin] = (potis[gpio_pin] * 49 + newpoti) / 50;
+  int p = potis[gpio_pin];
+  Serial.print(p);
+  Serial.print("\t");
+  // auto calibrate
+  potis_max[gpio_pin] = max(p, potis_max[gpio_pin]);
+  if (p)
+    potis_min[gpio_pin] = min(p, potis_min[gpio_pin]);
+
+  // snap to min, max and middle
+
+  if (p < 10) p = 0;
+  if (p > 1013) p = 1023;
+  int deadzone = 70;
+  if (p > 512-deadzone && p < 512+deadzone) p = 512; // delta to 512
+  Serial.print(p);
+  Serial.print("\t");
+
+  Serial.print(potis_min[gpio_pin]);
+  Serial.print("\t");
+  Serial.print(potis_max[gpio_pin]);
+  Serial.print("\t");
+  int delta_min = 512 - potis_min[gpio_pin];
+  int delta_max = potis_max[gpio_pin] - 512;
+  int delta = min(delta_min, delta_max);
+  int min_min = 512 - delta;
+  int max_max = 512 + delta;
+  //int min_min = max(potis_min[gpio_pin], 512 - (potis_max[gpio_pin] - 512));
+  //int max_max = min(potis_max[gpio_pin], 512 + (512 - potis_min[gpio_pin]));
+  Serial.print(min_min);
+  Serial.print("\t");
+  Serial.print(max_max);
+  Serial.print("\t");
+  //int p = 1024 * (p - min_min) / (float)(max_max - min_min);
+  if (max_max - min_min != 0)
+    p = (p - min_min) * (1023) / (max_max - min_min);
+  p = min(p, 1023);
+  p = max(p, 0);
+
+
+  return p;
+}
+
+bool get_button(int gpio_pin) {
+  int newbutton = !digitalRead(gpio_pin);
+  // debounce
+  buttons[gpio_pin] = (buttons[gpio_pin] * 29 + newbutton) / 30;
+  return buttons[gpio_pin] > 0.5;
+}
 
 void setup() {
   Serial.begin(115200);
   Serial.println("Use BOOTSEL to start the Joystick demo.");
   Joystick.begin();
   pinMode(22, INPUT_PULLUP);
+  for (int i=0; i<50; i++) {
+    potis_min[i] = 307; // 1023*0.3
+    potis_max[i] = 614; // 1023*0.6
+  }
 }
 
 void loop() {
-  int newpoti = analogRead(A0);
-  poti = (poti * 49 + newpoti) / 50;
-  Serial.print(poti);
+  int p1 = get_poti(A0);
+  int p2 = get_poti(A1);
+
+  bool b1 = get_button(22);
+
+  Joystick.X(p1);
+  Joystick.Y(p2);
+
+  Joystick.button(1, b1);
+
+  Serial.print(p1);
   Serial.print("\t");
 
-  int newpoti1 = analogRead(A1);
-  poti1 = (poti1 * 49 + newpoti1) / 50;
-  Serial.print(poti1);
+  Serial.print(p2);
   Serial.print("\t");
 
-
-  int newbtn1 = !digitalRead(22);
-  btn1 = (btn1 * 29 + newbtn1) / 30;
-  Serial.println(btn1);
-
-
-  Joystick.X(poti);
-  Joystick.Y(poti1);
-
-  Joystick.button(1, btn1 > 0.5);
+  Serial.println(b1);
 
   /*
   if (BOOTSEL) {
