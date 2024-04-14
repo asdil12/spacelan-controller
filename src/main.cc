@@ -6,6 +6,7 @@
  */
 
 #include <Joystick.h>
+#include "MC14051B.h"
 
 int poti = 0;
 int poti1 = 0;
@@ -15,6 +16,7 @@ int potis[50] = {0};
 int potis_max[50];
 int potis_min[50];
 float buttons[50] = {0};
+//MC14051B expander(4, 5, 6, 7, A2);
 
 int get_poti(int gpio_pin) {
   int newpoti = analogRead(gpio_pin);
