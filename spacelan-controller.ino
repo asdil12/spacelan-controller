@@ -7,13 +7,41 @@
 
 #include <Joystick.h>
 
+int poti = 0;
+int poti1 = 0;
+
+float btn1 = 0;
+
 void setup() {
   Serial.begin(115200);
   Serial.println("Use BOOTSEL to start the Joystick demo.");
   Joystick.begin();
+  pinMode(22, INPUT_PULLUP);
 }
 
 void loop() {
+  int newpoti = analogRead(A0);
+  poti = (poti * 49 + newpoti) / 50;
+  Serial.print(poti);
+  Serial.print("\t");
+
+  int newpoti1 = analogRead(A1);
+  poti1 = (poti1 * 49 + newpoti1) / 50;
+  Serial.print(poti1);
+  Serial.print("\t");
+
+
+  int newbtn1 = !digitalRead(22);
+  btn1 = (btn1 * 29 + newbtn1) / 30;
+  Serial.println(btn1);
+
+
+  Joystick.X(poti);
+  Joystick.Y(poti1);
+
+  Joystick.button(1, btn1 > 0.5);
+
+  /*
   if (BOOTSEL) {
 	Serial.println("Joystick buttons");
     for(uint8_t i = 1; i<=32; i++)
@@ -70,4 +98,5 @@ void loop() {
     for(int16_t i = -127; i<128; i++) { Joystick.sliderRight(i); delay(2); } Joystick.sliderRight(0);
     Joystick.use8bit(false);
   }
+  */
 }
