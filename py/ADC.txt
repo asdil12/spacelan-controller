@@ -1,0 +1,5 @@
+Helms:
+ - 1x Jump drive
+ - 2x combat manoever
+
+Turn via buttons and rotary encoder with display for heading
