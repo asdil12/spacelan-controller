@@ -1,6 +1,9 @@
-mpremote mip install github:robert-hh/Micropython-Editor
-mpremote mip install usb-device-cdc
+## Install dependencies
 
+```
+mpremote mip install usb-device-cdc
+mpremote mip install github:robert-hh/Micropython-Editor
+```
 
 ## adapter.py
 

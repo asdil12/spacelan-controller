@@ -17,8 +17,12 @@ def adapter(sd):
             if buffer.endswith(b"\n"):
                 cmd = buffer.strip().decode()
                 print(f"CMD: {cmd}", end='')
-                r = requests.get(f'http://127.0.0.1:8080/get.lua?{cmd}')
-                res = json.dumps(r.json())
+                try:
+                    r = requests.get(f'http://127.0.0.1:8080/get.lua?{cmd}', timeout=1)
+                    res = j = r.json()
+                except Exception as e:
+                    j = {"ERROR": repr(e)}
+                res = json.dumps(j)
                 print(f" -> {res}")
                 s.write(res.encode())
                 s.flush()
